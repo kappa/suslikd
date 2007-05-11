@@ -66,7 +66,7 @@ sub goph($) {
 }
 
 sub gophend {
-    goph ' -- powered by suslikd.pl,v';
+    goph ' -- powered by suslikd.pl,v$Id$';
     print ".$CRLF";
 }
 
