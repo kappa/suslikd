@@ -7,15 +7,23 @@ use base 'Net::Server'; # ::Fork
 
 use DBI;
 use Encode;
+use DBD::SQLite;
+use Carp::Heavy;
 
 my $TIMEOUT = 30;
 my $HOST = 'kapranoff.ru';
-my $PORT = 70;
+my $PORT = 7070;
 my $PATH = "$ENV{HOME}/work/gopher";
-my $WALL_DB = "wall_db";
+my $WALL_DB = "./wall_db";
 
 my $CRLF = "\x0D\x0A";
-my $outer_encoding = 'windows-1251';
+
+our $dbh;
+
+sub pre_loop_hook {
+    $dbh = DBI->connect("dbi:SQLite:dbname=$WALL_DB", q{}, q{},
+        { RaiseError => 1 });
+}
 
 sub goph($);
 sub gophinp($$);
@@ -98,8 +106,6 @@ sub gophinp($$) {
 }
 
 sub read_wall {
-    my $dbh = DBI->connect("dbi:SQLite:dbname=$WALL_DB", q{}, q{});
-
     my @wall = @{$dbh->selectall_arrayref("select time, who, words from wall order by time")};
 
     return map {
@@ -113,7 +119,6 @@ sub read_wall {
 
 sub write_wall {
     my ($self, $str) = @_;
-    my $dbh = DBI->connect("dbi:SQLite:dbname=$WALL_DB", q{}, q{});
 
     $dbh->do("insert into wall values (NULL, ?, ?, ?)",
         undef, time(), $self->{server}->{peerhost} || $self->{server}->{peeraddr}, $str);
