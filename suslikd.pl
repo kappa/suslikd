@@ -9,9 +9,10 @@ use DBI;
 use Encode;
 use DBD::SQLite;
 use Carp::Heavy;
+use Sys::Hostname;
 
 my $TIMEOUT = 30;
-my $HOST = 'kapranoff.ru';
+my $HOST = hostname;
 my $PORT = 70;
 my $PATH = "$ENV{HOME}/work/gopher";
 my $WALL_DB = "./wall_db";
@@ -120,8 +121,16 @@ sub read_wall {
 sub write_wall {
     my ($self, $str) = @_;
 
-    $dbh->do("insert into wall values (NULL, ?, ?, ?)",
-        undef, time(), $self->{server}->{peerhost} || $self->{server}->{peeraddr}, $str);
+    my $who = $self->{server}->{peerhost} || $self->{server}->{peeraddr};
+
+    our ($prev_who, $prev_str);
+
+    if (!$prev_who || $prev_who ne $who || $prev_str ne $str) {
+        $dbh->do("insert into wall values (NULL, ?, ?, ?)",
+            undef, time(), $who, $str);
+
+        ($prev_who, $prev_str) = ($who, $str);
+    }
 }
 
 package main;
