@@ -12,7 +12,7 @@ use Carp::Heavy;
 
 my $TIMEOUT = 30;
 my $HOST = 'kapranoff.ru';
-my $PORT = 7070;
+my $PORT = 70;
 my $PATH = "$ENV{HOME}/work/gopher";
 my $WALL_DB = "./wall_db";
 
@@ -36,7 +36,7 @@ sub process_request {
         local $SIG{ALRM} = sub { die "Timed out!\n" };
         my $prev_alarm = alarm($TIMEOUT);
 
-        my $str = <STDIN>;
+        my $str = <STDIN> || '';
         $str =~ s/$CRLF$//;
 
         warn 'suslik req - ' . localtime() . ' ' . $self->{server}->{peeraddr} . " [$str]\n";
@@ -76,7 +76,7 @@ sub default_handler {
     }
     goph '';
     gophinp 'Написать ещё букв...' => '';
-    goph '(Кстати, не рекомендую вводить русские буквы. От них на Стене образуются некрасивые пятна.)';
+    goph 'Кстати, не рекомендую вводить русские буквы. От них на Стене образуются некрасивые пятна.';
     gophend;
 }
 
