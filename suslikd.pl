@@ -35,7 +35,7 @@ sub process_request {
         my ($selector, $query) = split("\t", $str);
         $selector ||= q{}; $query ||= q{};
 
-        $self->dispatch($selector, Encode::decode('utf-8', $query));
+        $self->dispatch($selector, $query);
 
         alarm($prev_alarm);
     };
@@ -46,27 +46,30 @@ sub process_request {
 }
 
 our %action = (
-    default         => sub {
-        if ($_[1]) {
-            write_wall(@_);
-        }
-
-        goph 'Привет!';
-        goph 'Будет лучше, если Вы переключитесь в windows-1251.';
-        goph 'На всякий случай для тех, кто пока не видит русских букв, повторю 4 раза:';
-        goph 'windows-1251, windows-1251, windows-1251, windows-1251!';
-        goph '';
-        goph 'Это Стена, на ней пишут буквы.';
-        goph '';
-        goph 'Вот смотрите:';
-        foreach (read_wall()) {
-            goph $_;
-        }
-        goph '';
-        gophinp 'Написать ещё букв...' => '';
-        gophend;
-    },
+    default         => \&default_handler,
 );
+
+sub default_handler {
+    if ($_[1]) {
+        write_wall(@_);
+    }
+
+    goph 'Привет!';
+    goph '';
+    goph 'Это Стена, на ней пишут буквы.';
+    goph 'Вероятно, это также первый в мире UGC-шный gopher-сайт!';
+    goph 'В принципе, русских сайтов в gopher-спейсе тоже примерно ноль.';
+    goph 'Ура.';
+    goph '';
+    goph 'Вот смотрите, чего понаписали:';
+    foreach (read_wall()) {
+        goph $_;
+    }
+    goph '';
+    gophinp 'Написать ещё букв...' => '';
+    goph '(Кстати, не рекомендую вводить русские буквы. От них на Стене образуются некрасивые пятна.)';
+    gophend;
+}
 
 sub dispatch {
     my ($self, $selector, $query) = @_;
@@ -83,7 +86,7 @@ sub goph($) {
 sub gophend() {
 
     goph '' for 1 .. 5;
-    goph ' -- powered by suslikd.pl';
+    goph ' -- powered by suslikd,v1.1';
     print ".$CRLF";
 }
 
@@ -103,8 +106,7 @@ sub read_wall {
         $who =~ /(\w+\.\w+)$/
             and $who = $1;
 
-#        localtime($time) . ', кто-то@' . $who . ': ' . $words;
-        'кто-то@' . $who . ': ' . $words;
+        '...@' . $who . ': ' . $words;
     } @wall;
 }
 
@@ -112,7 +114,7 @@ sub write_wall {
     my ($self, $str) = @_;
     my $dbh = DBI->connect("dbi:SQLite:dbname=$WALL_DB", q{}, q{});
 
-    $dbh->do("insert into wall values (?, ?, ?)",
+    $dbh->do("insert into wall values (NULL, ?, ?, ?)",
         undef, time(), $self->{server}->{peerhost} || $self->{server}->{peeraddr}, $str);
 }
 
