@@ -3,15 +3,16 @@ use strict;
 use warnings;
 
 package Suslik::Daemon;
-use base 'Net::Server::PreFork';
+use base 'Net::Server'; # ::Fork
 
 use DBI;
 use Encode;
 
 my $TIMEOUT = 30;
-my $HOST = 'kapecod';
+my $HOST = 'kapranoff.ru';
 my $PORT = 70;
-my $WALL_DB = "$ENV{HOME}/work/gopher/wall_db";
+my $PATH = "$ENV{HOME}/work/gopher";
+my $WALL_DB = "wall_db";
 
 my $CRLF = "\x0D\x0A";
 my $outer_encoding = 'windows-1251';
@@ -124,5 +125,10 @@ Suslik::Daemon->run(
     port => $PORT,
 
     reverse_lookups => 1,
+    user => 'nobody',
+    group => 'nogroup',
+    chroot  => $PATH,
+    log_file => "$PATH/suslikd.log",
+    setsid => 1,
 );
 exit;
