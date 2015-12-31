@@ -1,0 +1,10 @@
+A Gopher server in Perl made as a joke in times when Gopher was still
+supported at least in Firefox but absolutely superceded by WWW in all
+practical applications.
+
+It claimed to be the first ever UGC Gopher server because it
+uses the search capability of Gopher to allow the generation of
+new content by users.
+
+It was also probably the only Gopher server using Russian language
+and cyrillic letters.
